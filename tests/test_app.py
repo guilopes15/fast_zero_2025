@@ -1,0 +1,13 @@
+from http import HTTPStatus
+
+from fastapi.testclient import TestClient
+
+from fast_zero_2025.app import app
+
+client = TestClient(app)
+
+
+def test_root_deve_retornar_ola_mundo():
+    response = client.get('/')
+    assert response.json() == {'message': 'Ola mundo!'}
+    assert response.status_code == HTTPStatus.OK
