@@ -11,6 +11,7 @@ from fast_zero_2025.app import app
 from fast_zero_2025.database import get_session
 from fast_zero_2025.models import User, table_registry
 from fast_zero_2025.security import get_password_hash
+from fast_zero_2025.settings import Settings
 
 
 @pytest.fixture
@@ -35,7 +36,6 @@ def session():
 
     with Session(engine) as session:
         yield session
-
     table_registry.metadata.drop_all(engine)
 
 
@@ -79,8 +79,13 @@ def user(session: Session):
 @pytest.fixture
 def token(client, user):
     response = client.post(
-        '/token/',
+        '/auth/token/',
         data={'username': user.email, 'password': user.clean_password},
     )
 
     return response.json()['access_token']
+
+
+@pytest.fixture
+def settings():
+    return Settings()
