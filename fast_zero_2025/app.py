@@ -12,12 +12,12 @@ app.include_router(auth.router)
 
 
 @app.get('/', status_code=HTTPStatus.OK, response_model=Message)
-def read_root():
+async def read_root():
     return {'message': 'Ola mundo!'}
 
 
 @app.get('/ola/', status_code=HTTPStatus.OK, response_class=HTMLResponse)
-def ola_mundo():
+async def ola_mundo():
     return """
     <html>
       <head>

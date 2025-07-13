@@ -11,6 +11,7 @@ from fast_zero_2025.models import User
 from fast_zero_2025.schemas import Token
 from fast_zero_2025.security import (
     create_access_token,
+    get_current_user,
     verify_password,
 )
 
@@ -43,3 +44,12 @@ async def login_for_access_token(
     access_token = create_access_token(data={'sub': user.email})
 
     return {'access_token': access_token, 'token_type': 'Bearer'}
+
+
+@router.post('/refresh_token', response_model=Token)
+async def resfresh_access_token(
+    user: Annotated[User, Depends(get_current_user)],
+):
+    new_access_token = create_access_token(data={'sub': user.email})
+
+    return {'access_token': new_access_token, 'token_type': 'Bearer'}

@@ -76,14 +76,14 @@ def test_update_user(client, user, token):
     }
 
 
-def test_update_user_with_invalid_id(client, token):
+def test_update_user_with_wrong_user(client, other_user, token):
     response = client.put(
-        '/users/0',
+        f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'bob',
-            'email': 'bob@test.com',
-            'password': '123',
+            'email': 'bob@example.com',
+            'password': 'mynewpassword',
         },
     )
     assert response.status_code == HTTPStatus.FORBIDDEN
@@ -94,9 +94,9 @@ def test_read_user_by_id(client, user):
     response = client.get(f'/users/{user.id}')
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
-        'username': 'test',
-        'email': 'test@test.com',
-        'id': 1,
+        'username': user.username,
+        'email': user.email,
+        'id': user.id,
     }
 
 
@@ -115,30 +115,21 @@ def test_delete_user(client, user, token):
     assert response.json() == {'message': 'User deleted'}
 
 
-def test_delete_user_with_invalid_id(client, token):
+def test_delete_user_with_wrong_user(client, other_user, token):
     response = client.delete(
-        '/users/99', headers={'Authorization': f'Bearer {token}'}
+        f'/users/{other_user.id}', headers={'Authorization': f'Bearer {token}'}
     )
 
     assert response.status_code == HTTPStatus.FORBIDDEN
     assert response.json() == {'detail': 'Not enough permissions'}
 
 
-def test_update_integrity_error(client, user, token):
-    client.post(
-        '/users/',
-        json={
-            'username': 'fausto',
-            'email': 'fausto@example.com',
-            'password': 'secret',
-        },
-    )
-
+def test_update_integrity_error(client, user, other_user, token):
     response = client.put(
         f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'username': 'fausto',
+            'username': other_user.username,
             'email': 'bob@example.com',
             'password': 'mynewpassword',
         },
