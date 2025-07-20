@@ -2,6 +2,7 @@ from dataclasses import asdict
 
 import pytest
 from sqlalchemy import select
+from sqlalchemy.exc import DataError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fast_zero_2025.models import Todo, User
@@ -42,12 +43,14 @@ async def test_create_todo_wrong_state(session, user):
     )
     session.add(new_todo)
 
-    await session.commit()
+    # Com o postgres, a exception do enum state foi alterado para DataError
+    with pytest.raises(DataError):
+        await session.commit()
 
-    with pytest.raises(LookupError) as ex:
-        await session.scalar(select(Todo).where(Todo.title == 'Test'))
+    # with pytest.raises(LookupError) as ex:
+    #     await session.scalar(select(Todo))
 
-    assert ex.value.args[0] == (
-        "'error' is not among the defined enum values. Enum name: todostate. "
-        "Possible values: draft, todo, doing, ..., trash"
-    )
+    # assert ex.value.args[0] == (
+    #     "'error' is not among the defined enum values. Enum name: todostate."
+    #     'Possible values: draft, todo, doing, ..., trash'
+    # )
